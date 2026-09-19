@@ -94,9 +94,9 @@ structure ZFModel (M : PSet.{u} → Prop) : Prop where
     ¬¬∃ b, M b ∧ ∀ x y, x ∈ a → M y → Sat M ψ (Env.cons x (Env.cons y e)) → y ∈ b
 
 /-- Every nonempty subset of a set has an `∈`-minimal element. -/
-theorem exists_minimal (x : PSet.{u}) :
-    ∀ z, z ∈ x → ¬¬∃ y, y ∈ x ∧ ∀ w, w ∈ y → ¬ w ∈ x :=
-  mem_induction (P := fun z => z ∈ x → ¬¬∃ y, y ∈ x ∧ ∀ w, w ∈ y → ¬ w ∈ x) fun z ih hz =>
+theorem exists_minimal (x : PSet.{u}) (z) :
+    z ∈ x → ¬¬∃ y, y ∈ x ∧ ∀ w, w ∈ y → ¬ w ∈ x :=
+  mem_induction z fun z ih hz =>
     Stable.by_cases (∃ w, w ∈ z ∧ w ∈ x) (fun ⟨w, hw, hwx⟩ => ih w hw hwx)
       fun h => nn_intro ⟨z, hz, fun w hw hwx => h ⟨w, hw, hwx⟩⟩
 

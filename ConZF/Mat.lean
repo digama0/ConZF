@@ -142,8 +142,7 @@ recursion returns `t` at `p`, whatever the accessibility proof. No excluded midd
 theorem materialize {τ : Path.{u} → PSet.{u} → Prop} (hτ : Coherent D U τ) :
     ∀ (t : PSet.{u}) (p : Path.{u}), τ p t → ∀ acc, F D U (Rel τ) p acc ≈ t := by
   intro t
-  refine mem_induction (P := fun t => ∀ p, τ p t → ∀ acc, F D U (Rel τ) p acc ≈ t)
-    (fun t ih => ?_) t
+  refine mem_induction t fun t ih => ?_
   intro p hp acc
   have hrec : ∀ c (h : Rel τ c p) tc, τ c tc → F D U (Rel τ) c (acc.inv h) ≈ tc := by
     rintro c ⟨l, rfl, _⟩ tc htc
@@ -188,7 +187,7 @@ theorem swf_root_of_desc {τ : Path.{u} → PSet.{u} → Prop} (desc : Desc τ) 
   intro P hs H
   have := hs
   have key : ∀ (t : PSet.{u}) (p : Path.{u}), τ p t → P p := fun t =>
-    mem_induction (P := fun t => ∀ p, τ p t → P p) (fun t ih p hp => H p (by
+    mem_induction t fun t ih p hp => H p <| by
       rintro c ⟨l, rfl, tc, htc⟩
-      exact ih tc (desc htc hp) _ htc)) t
+      exact ih tc (desc htc hp) _ htc
   exact H [] fun c ⟨_, _, tc, htc⟩ => key tc c htc

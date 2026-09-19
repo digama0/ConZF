@@ -65,8 +65,8 @@ theorem equiv_iff_mem {x y : PSet.{u}} : x ≈ y ↔ ∀ z, z ∈ x ↔ z ∈ y 
   ⟨fun h _ => mem_congr_right h, ext⟩
 
 /-- `∈`-induction, for **stable** predicates. -/
-theorem mem_induction {P : PSet.{u} → Prop} [∀ x, Stable (P x)]
-    (H : ∀ x, (∀ y, y ∈ x → P y) → P x) (x : PSet.{u}) : P x := by
+@[elab_as_elim] theorem mem_induction {P : PSet.{u} → Prop} [∀ x, Stable (P x)]
+    (x : PSet.{u}) (H : ∀ x, (∀ y, y ∈ x → P y) → P x) : P x := by
   suffices ∀ x y, y ≈ x → P y from this x x (Equiv.refl x)
   intro x
   induction x with

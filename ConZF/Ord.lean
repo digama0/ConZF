@@ -8,8 +8,8 @@ universe u
 
 namespace PSet
 
-theorem mem_asymm (x : PSet.{u}) : ∀ {y}, y ∈ x → ¬ x ∈ y :=
-  mem_induction (P := fun x => ∀ {y}, y ∈ x → ¬ x ∈ y) (fun _ ih _ hy hx => ih _ hy hx hy) x
+theorem mem_asymm (x : PSet.{u}) : ∀ {{y}}, y ∈ x → ¬ x ∈ y :=
+  mem_induction x fun _ ih _ hy hx => ih _ hy hx hy
 
 theorem not_mem_self (a : PSet.{u}) : ¬ a ∈ a := fun h => mem_asymm a h h
 
@@ -66,14 +66,8 @@ theorem isOrd_iUnion {ι : Type u} {A : ι → PSet.{u}} (h : ∀ i, IsOrd (A i)
   · exact Stable.of_nn (mem_iUnion.1 hy) fun ⟨i, hi⟩ => (h i).mem_trans y hi
 
 /-- Ordinals are linearly ordered by `∈`. -/
-theorem IsOrd.trichotomy : ∀ {a b : PSet.{u}}, IsOrd a → IsOrd b → ¬¬(a ∈ b ∨ a ≈ b ∨ b ∈ a) := by
-  intro a
-  refine mem_induction (P := fun a => ∀ {b}, IsOrd a → IsOrd b → ¬¬(a ∈ b ∨ a ≈ b ∨ b ∈ a))
-    (fun a iha => ?_) a
-  intro b
-  refine mem_induction (P := fun b => IsOrd a → IsOrd b → ¬¬(a ∈ b ∨ a ≈ b ∨ b ∈ a))
-    (fun b ihb => ?_) b
-  intro ha hb
+theorem IsOrd.trichotomy : ∀ {{a b : PSet.{u}}}, IsOrd a → IsOrd b → ¬¬(a ∈ b ∨ a ≈ b ∨ b ∈ a) := by
+  refine fun a => mem_induction a fun a iha b => mem_induction b fun b ihb ha hb => ?_
   refine Stable.by_cases (a ∈ b) (fun h => nn_intro (.inl h)) fun h1 => ?_
   refine Stable.by_cases (b ∈ a) (fun h => nn_intro (.inr (.inr h))) fun h2 => ?_
   refine nn_intro (.inr (.inl (ext fun z => ⟨fun hz => ?_, fun hz => ?_⟩)))
@@ -128,10 +122,8 @@ theorem isOrd_rank : ∀ x : PSet.{u}, IsOrd (rank x)
   | ⟨_, A⟩ => isOrd_iUnion fun a => (isOrd_rank (A a)).succ
 
 /-- The rank of an ordinal is itself. -/
-theorem IsOrd.rank_equiv : ∀ {t : PSet.{u}}, IsOrd t → rank t ≈ t := by
-  intro t
-  refine mem_induction (P := fun t => IsOrd t → rank t ≈ t) (fun t ih => ?_) t
-  intro ht
+theorem IsOrd.rank_equiv {t : PSet.{u}} : IsOrd t → rank t ≈ t := by
+  refine mem_induction t fun t ih ht => ?_
   refine ext fun z => mem_rank'.trans ⟨fun h => ?_, fun hz => nn_intro ⟨z, hz, ?_⟩⟩
   · refine Stable.of_nn h fun ⟨y, hy, hz⟩ => ?_
     refine Stable.of_nn (mem_succ.1 ((mem_congr_right (succ_congr (ih y hy (ht.mem hy)))).1 hz)) ?_
