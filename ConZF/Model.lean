@@ -272,6 +272,38 @@ theorem accHyp_of_mem_wf (h : ¬¬∀ x : PSet.{u}, Acc (· ∈ ·) x) : AccHyp.
 theorem con_ZF_of_mem_wf (h : ¬¬∀ x : PSet.{0}, Acc (· ∈ ·) x) : Con ZF :=
   con_ZF (accHyp_of_mem_wf h)
 
+/-- The assignment whose paths are the `∈`-descending sequences of sets: the path
+`[c xₙ, …, c x₁]` with `xₙ ∈ … ∈ x₁` has the target `xₙ`. Every set is the target of a child
+of the root. -/
+inductive Chain : Path.{u} → PSet.{u} → Prop
+  | one (y) : Chain [.c y] y
+  | cons {p t} (y) : Chain p t → y ∈ t → Chain (.c y :: p) y
+
+theorem Chain.head_eq : ∀ {p : Path.{u}} {t t'}, Chain p t → Chain p t' → t = t'
+  | _, _, _, .one _, .one _ => rfl
+  | _, _, _, .cons _ _ _, .cons _ _ _ => rfl
+
+theorem chain_desc : Desc Chain.{u} := by
+  intro l p t t' h h'
+  cases h with
+  | one => cases h'
+  | cons y h0 hy => cases h0.head_eq h'; exact hy
+
+theorem mem_acc_of_chain {p : Path.{u}} (acc : Acc (Rel Chain) p) :
+    ∀ {t}, Chain p t → Acc (· ∈ ·) t := by
+  induction acc with
+  | intro p _ ih =>
+    intro t ht
+    exact ⟨_, fun y hy => ih (.c y :: p) ⟨_, rfl, y, .cons y ht hy⟩ (.cons y ht hy)⟩
+
+/-- Conversely, the accessibility hypothesis gives the well-foundedness of membership: the two
+are equivalent. -/
+theorem mem_wf_of_accHyp (h : AccHyp.{u}) : ¬¬∀ x : PSet.{u}, Acc (· ∈ ·) x :=
+  nn_map (fun acc x => mem_acc_of_chain (acc.inv ⟨_, rfl, x, .one x⟩) (.one x)) (h _ chain_desc)
+
+theorem accHyp_iff_mem_wf : AccHyp.{u} ↔ ¬¬∀ x : PSet.{u}, Acc (· ∈ ·) x :=
+  ⟨mem_wf_of_accHyp, accHyp_of_mem_wf⟩
+
 theorem accHyp_of_not_not_em (h : ¬¬∀ p : Prop, p ∨ ¬p) : AccHyp.{u} := fun τ desc hn =>
   h fun em => hn <| swf_root_of_desc desc (Acc (Rel τ))
     (fun p => ⟨fun hp => (em (Acc (Rel τ) p)).resolve_right hp⟩) fun x ih => ⟨x, ih⟩

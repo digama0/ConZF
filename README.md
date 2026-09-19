@@ -11,6 +11,7 @@ def AccHyp : Prop := ∀ τ : Path → PSet → Prop, Desc τ → ¬¬Acc (Rel �
 
 theorem PSet.con_ZF (hacc : AccHyp) : Con ZF
 -- 'PSet.con_ZF' does not depend on any axioms
+theorem PSet.accHyp_iff_mem_wf : AccHyp ↔ ¬¬∀ x : PSet, Acc (· ∈ ·) x
 theorem PSet.con_ZF_of_mem_wf (h : ¬¬∀ x : PSet, Acc (· ∈ ·) x) : Con ZF
 theorem PSet.con_ZF_of_not_not_em (h : ¬¬∀ p : Prop, p ∨ ¬p) : Con ZF
 ```
